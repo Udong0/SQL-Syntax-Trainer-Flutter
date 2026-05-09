@@ -1,6 +1,10 @@
 # SQL Syntax Trainer (Flutter + Gemini AI)
 
 Aplikasi **SQL Syntax Trainer** adalah platform edukasi interaktif berbasis mobile/web (dibangun dengan Flutter) yang membantu pengguna untuk berlatih menulis query SQL secara real-time. Alih-alih terhubung langsung ke database konvensional, aplikasi ini ditenagai oleh **Google Gemini API** (khususnya `gemini-1.5-flash`) yang bertindak sebagai *Smart Evaluator*.
+<img width="959" height="498" alt="image" src="https://github.com/user-attachments/assets/299ee6c7-7ce4-4808-87c7-218a18bdc9e1" />
+<img width="959" height="500" alt="image" src="https://github.com/user-attachments/assets/cb82b5d2-d384-42b5-b905-906d33822062" />
+<img width="569" height="181" alt="image" src="https://github.com/user-attachments/assets/da54d6d7-60f4-4ef7-ac89-ce74c3f5f36d" />
+
 
 ## Fitur Utama 🚀
 
