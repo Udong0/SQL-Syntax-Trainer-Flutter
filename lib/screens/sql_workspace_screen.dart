@@ -208,7 +208,18 @@ class _SqlEditorState extends State<_SqlEditor> {
                       ],
                     );
                   }
-                  return const SizedBox.shrink();
+                  return ElevatedButton.icon(
+                    onPressed: provider.currentQuery.trim().isEmpty
+                        ? null
+                        : () => provider.evaluateQuery(),
+                    icon: const Icon(Icons.play_arrow, size: 18),
+                    label: const Text('Evaluate Query'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                  );
                 },
               ),
             ],

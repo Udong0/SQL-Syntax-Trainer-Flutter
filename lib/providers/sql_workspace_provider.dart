@@ -14,8 +14,6 @@ class SqlWorkspaceProvider extends ChangeNotifier {
   bool _isGeneratingScenario = false;
   String _selectedLevel = 'Beginner';
   SqlEvaluation? _lastEvaluation;
-  
-  Timer? _debounceTimer;
 
   // Getters
   DatabaseScenario get currentScenario => _currentScenario;
@@ -52,23 +50,11 @@ class SqlWorkspaceProvider extends ChangeNotifier {
   void updateQuery(String newQuery) {
     _currentQuery = newQuery;
     notifyListeners();
-
-    // Debounce logic: wait 1.5 seconds after user stops typing before making API call
-    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
-    
-    if (newQuery.trim().isEmpty) {
-      _lastEvaluation = null;
-      _isLoading = false;
-      notifyListeners();
-      return;
-    }
-
-    _debounceTimer = Timer(const Duration(milliseconds: 1500), () {
-      _evaluateQuery();
-    });
   }
 
-  Future<void> _evaluateQuery() async {
+  Future<void> evaluateQuery() async {
+    if (_currentQuery.trim().isEmpty) return;
+
     _isLoading = true;
     notifyListeners();
 
@@ -89,7 +75,6 @@ INSTRUCTION: ${_currentScenario.instruction}
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
     super.dispose();
   }
 }
