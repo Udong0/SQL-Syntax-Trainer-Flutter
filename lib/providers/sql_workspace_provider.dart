@@ -1,0 +1,95 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import '../models/database_scenario.dart';
+import '../models/sql_evaluation.dart';
+import '../services/gemini_service.dart';
+
+class SqlWorkspaceProvider extends ChangeNotifier {
+  final GeminiService _geminiService = GeminiService();
+  
+  // State
+  DatabaseScenario _currentScenario = DatabaseScenario.defaultScenario;
+  String _currentQuery = "";
+  bool _isLoading = false;
+  bool _isGeneratingScenario = false;
+  String _selectedLevel = 'Beginner';
+  SqlEvaluation? _lastEvaluation;
+  
+  Timer? _debounceTimer;
+
+  // Getters
+  DatabaseScenario get currentScenario => _currentScenario;
+  String get currentQuery => _currentQuery;
+  bool get isLoading => _isLoading;
+  bool get isGeneratingScenario => _isGeneratingScenario;
+  String get selectedLevel => _selectedLevel;
+  SqlEvaluation? get lastEvaluation => _lastEvaluation;
+
+  // Setters
+  void updateLevel(String level) {
+    _selectedLevel = level;
+    notifyListeners();
+  }
+
+  Future<void> generateNewScenario() async {
+    _isGeneratingScenario = true;
+    _lastEvaluation = null;
+    _currentQuery = "";
+    notifyListeners();
+
+    try {
+      final newScenario = await _geminiService.generateScenario(_selectedLevel);
+      _currentScenario = newScenario;
+    } catch (e) {
+      debugPrint("Failed to generate scenario: $e");
+      // keep old scenario on error
+    } finally {
+      _isGeneratingScenario = false;
+      notifyListeners();
+    }
+  }
+
+  void updateQuery(String newQuery) {
+    _currentQuery = newQuery;
+    notifyListeners();
+
+    // Debounce logic: wait 1.5 seconds after user stops typing before making API call
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    
+    if (newQuery.trim().isEmpty) {
+      _lastEvaluation = null;
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    _debounceTimer = Timer(const Duration(milliseconds: 1500), () {
+      _evaluateQuery();
+    });
+  }
+
+  Future<void> _evaluateQuery() async {
+    _isLoading = true;
+    notifyListeners();
+
+    final schemaContext = '''
+SCENARIO: ${_currentScenario.title}
+CONTEXT: ${_currentScenario.context}
+SCHEMA:
+${_currentScenario.schema}
+INSTRUCTION: ${_currentScenario.instruction}
+''';
+
+    final result = await _geminiService.evaluateSQL(_currentQuery, schemaContext);
+    
+    _lastEvaluation = result;
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+}
