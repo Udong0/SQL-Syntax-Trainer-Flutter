@@ -1,146 +1,59 @@
-# 🤖 EdgeAI Flutter — Tugas Kuliah
+# SQL Syntax Trainer (Flutter + Gemini AI)
 
-Aplikasi Flutter yang mendemonstrasikan konsep **Edge Computing dengan Kecerdasan Buatan (AI)**, 
-di mana inferensi model ML berjalan langsung di perangkat (on-device) tanpa perlu koneksi internet atau server cloud.
+Aplikasi **SQL Syntax Trainer** adalah platform edukasi interaktif berbasis mobile/web (dibangun dengan Flutter) yang membantu pengguna untuk berlatih menulis query SQL secara real-time. Alih-alih terhubung langsung ke database konvensional, aplikasi ini ditenagai oleh **Google Gemini API** (khususnya `gemini-1.5-flash`) yang bertindak sebagai *Smart Evaluator*.
 
----
+## Fitur Utama 🚀
 
-## 📱 Fitur Utama
+- **Smart SQL Evaluator:** Mengetik query SQL di editor dan mendapatkan feedback seketika. AI akan mengecek *Syntax Error*, *Logic Error*, dan memberikan saran (Hint) atau query yang paling optimal.
+- **Infinite Levels (AI-Generated Scenarios):** Tidak perlu repot menyiapkan soal! Cukup pilih tingkat kesulitan (*Beginner*, *Intermediate*, *Advanced*) dan aplikasi akan meminta AI untuk membuatkan struktur database baru (Tema, Tabel, dan Instruksi Soal) secara acak dan dinamis.
+- **Copy to Clipboard:** Solusi (*Optimized Query*) yang diberikan oleh AI dapat langsung disalin hanya dengan satu klik.
+- **Secure API Key Management:** Menggunakan package `flutter_dotenv` untuk melindungi kerahasiaan API Key Google Gemini agar tidak ter-*commit* ke repositori publik.
+- **Debounced Validation:** Aplikasi menggunakan *timer debounce* (1.5 detik) yang otomatis mengirimkan query ke API hanya saat pengguna selesai mengetik, untuk menghemat kuota *request* ke AI.
 
-| Fitur | Model | Latensi Edge |
-|-------|-------|-------------|
-| Klasifikasi Gambar | MobileNetV3-Small (TFLite) | 80–150ms |
-| Analisis Sentimen | BERT-Lite (TFLite) | 60–260ms |
-| Deteksi Objek Real-time | YOLOv8n (TFLite) | 30–80ms |
-| Benchmark Edge vs Cloud | — | Perbandingan langsung |
+## Tech Stack 💻
+- **Frontend Framework:** Flutter (Dart)
+- **State Management:** Provider
+- **AI Integration:** `google_generative_ai` (Google Gemini SDK)
+- **Environment Management:** `flutter_dotenv`
 
----
+## Persiapan & Cara Menjalankan (Setup) 🛠️
 
-## 🏗 Arsitektur Proyek
+Ikuti langkah-langkah di bawah ini untuk menjalankan aplikasi di perangkat lokal Anda:
 
-```
-lib/
-├── main.dart                    # Entry point + App Theme
-├── models/
-│   └── ai_result.dart           # Data classes (Prediction, SentimentResult, dll)
-├── services/
-│   └── edge_ai_service.dart     # Logika inferensi AI + state management
-├── screens/
-│   ├── home_screen.dart         # Dashboard utama
-│   ├── image_classification_screen.dart
-│   ├── sentiment_analysis_screen.dart
-│   ├── object_detection_screen.dart
-│   ├── benchmark_screen.dart    # Perbandingan Edge vs Cloud
-│   └── inference_log_screen.dart
-└── widgets/
-    └── common_widgets.dart      # Reusable UI components
-```
-
----
-
-## 🧠 Konsep Edge Computing AI
-
-### Apa itu Edge Computing?
-Edge computing adalah paradigma komputasi di mana pemrosesan data dilakukan **dekat dengan sumber data** (perangkat pengguna), bukan di server cloud yang jauh.
-
-### Edge vs Cloud AI
-
-| Aspek | Edge (On-Device) | Cloud AI |
-|-------|-----------------|----------|
-| **Latensi** | 30–200ms | 300–800ms |
-| **Privasi** | ✅ Data tidak keluar perangkat | ❌ Data dikirim ke server |
-| **Offline** | ✅ Bekerja tanpa internet | ❌ Butuh koneksi |
-| **Biaya** | Gratis setelah deploy | Per-request billing |
-| **Skalabilitas** | Terbatas oleh hardware | Tak terbatas |
-
-### Model yang Digunakan (TensorFlow Lite)
-
-1. **MobileNetV3-Small** — Model CNN ringan (~2.5MB) untuk klasifikasi gambar. 
-   Dioptimasi dengan depthwise separable convolutions untuk perangkat mobile.
-
-2. **BERT-Lite** — Versi distilasi dari BERT untuk NLP on-device.
-   Mendukung pemahaman konteks teks dalam berbagai bahasa.
-
-3. **YOLOv8n** — Varian nano dari YOLOv8 (~3.2MB), mendeteksi 80 kelas objek
-   dengan arsitektur CSPDarknet + PAN-FPN yang efisien.
-
----
-
-## 🚀 Cara Menjalankan
-
-### Prerequisites
-- Flutter SDK 3.0+
-- Dart SDK 3.0+
-- Android Studio / VS Code dengan Flutter extension
-
-### Instalasi
-
+### 1. Clone Repositori
 ```bash
-# Clone atau buka folder proyek
-cd flutter_edge_ai
+git clone https://github.com/Udong0/SQL-Syntax-Trainer-Flutter.git
+cd SQL-Syntax-Trainer-Flutter
+```
 
-# Install dependencies
+### 2. Dapatkan Gemini API Key
+Anda memerlukan API Key gratis dari Google AI Studio.
+- Kunjungi [Google AI Studio](https://aistudio.google.com/).
+- Login menggunakan akun Google Anda dan buat **API Key** baru.
+
+### 3. Setup File Konfigurasi `.env`
+Agar API Key Anda aman, aplikasi ini tidak menuliskannya langsung ke dalam kode.
+1. Buat sebuah file baru bernama `.env` di root direktori proyek (sejajar dengan file `pubspec.yaml`).
+2. Buka file `.env` dan masukkan API Key Anda dengan format seperti ini:
+   ```env
+   GEMINI_API_KEY=AIzaSyxxxxxxxxxxxxxxxxx
+   ```
+*(Catatan: File `.env` sudah masuk ke dalam `.gitignore` sehingga tidak akan terunggah ke GitHub)*.
+
+### 4. Install Dependencies
+```bash
 flutter pub get
+```
 
-# Jalankan di emulator atau perangkat fisik
+### 5. Jalankan Aplikasi
+Anda dapat menjalankannya di emulator, browser, maupun desktop:
+```bash
 flutter run
-
-# Build APK untuk Android
-flutter build apk --release
-
-# Build untuk iOS
-flutter build ios --release
 ```
 
----
-
-## 📚 Dependencies Utama
-
-```yaml
-provider: ^6.1.1          # State management
-fl_chart: ^0.68.0          # Chart & visualisasi data  
-image_picker: ^1.0.7       # Pilih gambar dari galeri/kamera
-google_fonts: ^6.2.1       # Typography premium
-flutter_animate: ^4.5.0    # Animasi modern
-shimmer: ^3.0.0            # Loading skeleton effect
-percent_indicator: ^4.2.3  # Progress indicator
-```
+## Arsitektur State 🧩
+*   Aplikasi ini menggunakan **`SqlWorkspaceProvider`** untuk menangani pertukaran data antara *UI* (Editor & Panel) dan *Service* (`GeminiService`).
+*   Saat pengguna mengetik, state dikelola secara reaktif dan memicu evaluasi otomatis setelah *user* berhenti mengetik sejenak.
 
 ---
-
-## 🎓 Konsep Akademis
-
-### Topik yang Dicakup
-
-1. **Machine Learning Pipeline** — Pre-processing → Inference → Post-processing
-2. **Model Quantization** — Konversi model dari FP32 ke INT8 untuk efisiensi edge
-3. **Transfer Learning** — Penggunaan pre-trained model yang sudah dioptimasi
-4. **Real-time Processing** — Manajemen thread dan async processing
-5. **Privacy-preserving AI** — Federated learning dan on-device inference
-6. **State Management** — Provider pattern dengan ChangeNotifier
-
-### Referensi
-
-- TensorFlow Lite: https://tensorflow.org/lite
-- MobileNetV3: Howard et al. (2019) - "Searching for MobileNetV3"
-- YOLOv8: Jocher et al. (2023) - Ultralytics YOLOv8
-- BERT-Lite: Sun et al. (2020) - "MobileBERT"
-- Edge Computing: Shi et al. (2016) - "Edge Computing: Vision and Challenges"
-
----
-
-## 👨‍💻 Tentang Implementasi
-
-Aplikasi ini **mensimulasikan** inferensi model TFLite karena integrasi model 
-sebenarnya memerlukan file `.tflite` terpisah dan setup native. Simulasi mencerminkan:
-
-- ✅ Timing realistis berdasarkan benchmark perangkat nyata
-- ✅ Output probabilitas yang masuk akal
-- ✅ Arsitektur kode yang sama dengan implementasi produksi
-- ✅ UX flow yang identik dengan aplikasi sebenarnya
-
-Untuk implementasi penuh dengan model nyata, gunakan package `tflite_flutter: ^0.10.4`.
-
----
-
-*Tugas Kuliah — Edge Computing & AI Mobile | Flutter/Dart*
+*Dibuat untuk keperluan latihan dan demonstrasi integrasi AI Generatif ke dalam aplikasi Flutter.*
