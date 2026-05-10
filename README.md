@@ -79,5 +79,3 @@ Pilih target perangkat (Chrome/Edge untuk web, atau emulator/desktop).
 3. **Evaluate:** Klik tombol **"Evaluate Query"** untuk mengirim query ke AI evaluator.
 4. **Review Feedback:** Lihat hasil evaluasi di panel bawah — termasuk status valid/invalid, error, saran, dan solusi optimal.
 
----
-*Dibuat untuk keperluan Tugas Kuliah — Demonstrasi integrasi Edge AI ke dalam aplikasi Flutter.*
