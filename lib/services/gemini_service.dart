@@ -1,30 +1,25 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/sql_evaluation.dart';
 import '../models/database_scenario.dart';
 
-/// Service yang menggunakan Groq API (OpenAI-compatible) sebagai pengganti Gemini.
-/// Groq gratis, cepat, dan limitnya besar (6000 req/hari).
+/// Service yang menggunakan Ollama (lokal) dengan model qwen2.5-coder:7b.
+/// Jalankan Ollama terlebih dahulu: ollama serve
+/// Pull model: ollama pull qwen2.5-coder:7b
 class GeminiService {
-  static const String _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
-  static const String _model = 'llama-3.3-70b-versatile';
+  static const String _baseUrl = 'http://localhost:11434/v1/chat/completions';
+  static const String _model = 'qwen2.5-coder:7b';
 
   GeminiService();
 
   String _getApiKey() {
-    final apiKey = dotenv.env['GROQ_API_KEY'];
-    if (apiKey == null || apiKey.isEmpty || apiKey == 'API_KEY_ANDA_DISINI') {
-      throw Exception(
-          "GROQ_API_KEY tidak ditemukan di file .env. "
-          "Dapatkan API key gratis di https://console.groq.com");
-    }
-    return apiKey;
+    // Ollama tidak memerlukan API key
+    return 'ollama';
   }
 
-  /// Mengirim request ke Groq API
-  Future<Map<String, dynamic>> _sendRequest({
+  /// Mengirim request ke Ollama API
+  Future<String> _sendRequest({
     required String systemPrompt,
     required String userPrompt,
   }) async {
@@ -51,12 +46,12 @@ class GeminiService {
 
     if (response.statusCode != 200) {
       throw Exception(
-          'Groq API error (${response.statusCode}): ${response.body}');
+          'Ollama error (${response.statusCode}): ${response.body}');
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     final content = data['choices'][0]['message']['content'] as String;
-    return jsonDecode(content) as Map<String, dynamic>;
+    return content;
   }
 
   Future<SqlEvaluation> evaluateSQL(
@@ -78,17 +73,17 @@ USER QUERY:
 $userQuery
 ''';
 
-      final json = await _sendRequest(
+      final content = await _sendRequest(
         systemPrompt: systemPrompt,
         userPrompt: userPrompt,
       );
 
-      return SqlEvaluation.fromJson(json);
+      return SqlEvaluation.fromRawJson(content);
     } catch (e) {
       debugPrint('evaluateSQL error: $e');
       return SqlEvaluation(
         isValid: false,
-        syntaxError: 'Gagal terhubung ke AI Evaluator: ${e.toString()}',
+        syntaxError: 'Gagal terhubung ke Ollama. Pastikan Ollama sudah berjalan (ollama serve): ${e.toString()}',
       );
     }
   }
@@ -119,11 +114,11 @@ $userQuery
         "Tingkat kesulitan: $difficultyLevel. Pastikan sesuai dengan kriteria tingkat kesulitan tersebut.";
 
     try {
-      final json = await _sendRequest(
+      final content = await _sendRequest(
         systemPrompt: systemPrompt,
         userPrompt: userPrompt,
       );
-      return DatabaseScenario.fromJson(json);
+      return DatabaseScenario.fromRawJson(content);
     } catch (e) {
       throw Exception("Gagal membuat skenario: $e");
     }
